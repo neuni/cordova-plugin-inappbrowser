@@ -59,6 +59,12 @@
 @property (nonatomic, assign) BOOL hidden;
 @property (nonatomic, assign) BOOL disallowoverscroll;
 
+@property (nonatomic, copy) NSString* custombuttonlabel;
+@property (nonatomic, copy) NSString* custombuttonfont;
+@property (nonatomic, assign) double custombuttonfontsize;
+@property (nonatomic, copy) NSString* textcolor;
+@property (nonatomic, copy) NSString* backgroundcolor;
+
 + (CDVInAppBrowserOptions*)parseOptions:(NSString*)options;
 
 @end
@@ -78,6 +84,7 @@
 @property (nonatomic, strong) IBOutlet UIBarButtonItem* backButton;
 @property (nonatomic, strong) IBOutlet UIBarButtonItem* forwardButton;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView* spinner;
+@property (nonatomic, strong) IBOutlet UIProgressView* progressBar;
 @property (nonatomic, strong) IBOutlet UIToolbar* toolbar;
 
 @property (nonatomic, weak) id <CDVScreenOrientationDelegate> orientationDelegate;
