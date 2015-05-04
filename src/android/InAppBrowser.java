@@ -22,7 +22,6 @@ import android.annotation.SuppressLint;
 import org.apache.cordova.inappbrowser.InAppBrowserDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.provider.Browser;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -79,6 +78,7 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String LOAD_START_EVENT = "loadstart";
     private static final String LOAD_STOP_EVENT = "loadstop";
     private static final String LOAD_ERROR_EVENT = "loaderror";
+	private static final String CUSTOM_BTN_EVENT = "custombutton";
     private static final String CLEAR_ALL_CACHE = "clearcache";
     private static final String CLEAR_SESSION_CACHE = "clearsessioncache";
 
@@ -344,7 +344,6 @@ public class InAppBrowser extends CordovaPlugin {
             } else {
                 intent.setData(uri);
             }
-			intent.putExtra(Browser.EXTRA_APPLICATION_ID, cordova.getActivity().getPackageName());
             this.cordova.getActivity().startActivity(intent);
             return "";
         } catch (android.content.ActivityNotFoundException e) {
@@ -407,6 +406,23 @@ public class InAppBrowser extends CordovaPlugin {
             this.inAppWebView.goForward();
         }
     }
+	
+	private void customButtonAction() {
+		
+		//send event to JS
+        try {
+			String webUrl = this.inAppWebView.getUrl();
+			
+            JSONObject obj = new JSONObject();
+            obj.put("type", CUSTOM_BTN_EVENT);
+            obj.put("url", webUrl);
+
+            sendUpdate(obj, true);
+        } catch (JSONException ex) {
+            Log.d(LOG_TAG, "Should never happen");
+        }
+		
+	}
 
     /**
      * Navigate to the new page
@@ -503,8 +519,8 @@ public class InAppBrowser extends CordovaPlugin {
                 // Toolbar layout
                 RelativeLayout toolbar = new RelativeLayout(cordova.getActivity());
                 //Please, no more black! 
-                toolbar.setBackgroundColor(android.graphics.Color.LTGRAY);
-                toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(44)));
+                toolbar.setBackgroundColor(android.graphics.Color.WHITE);
+                toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(42)));
                 toolbar.setPadding(this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2));
                 toolbar.setHorizontalGravity(Gravity.LEFT);
                 toolbar.setVerticalGravity(Gravity.TOP);
@@ -519,9 +535,12 @@ public class InAppBrowser extends CordovaPlugin {
                 // Back button
                 Button back = new Button(cordova.getActivity());
                 RelativeLayout.LayoutParams backLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-                backLayoutParams.addRule(RelativeLayout.ALIGN_LEFT);
+                
+				//backLayoutParams.addRule(RelativeLayout.ALIGN_LEFT);
+				backLayoutParams.addRule(RelativeLayout.RIGHT_OF, 5);
+				
                 back.setLayoutParams(backLayoutParams);
-                back.setContentDescription("Back Button");
+                back.setContentDescription("Back");
                 back.setId(2);
                 Resources activityRes = cordova.getActivity().getResources();
                 int backResId = activityRes.getIdentifier("ic_action_previous_item", "drawable", cordova.getActivity().getPackageName());
@@ -545,7 +564,7 @@ public class InAppBrowser extends CordovaPlugin {
                 RelativeLayout.LayoutParams forwardLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
                 forwardLayoutParams.addRule(RelativeLayout.RIGHT_OF, 2);
                 forward.setLayoutParams(forwardLayoutParams);
-                forward.setContentDescription("Forward Button");
+                forward.setContentDescription("Forward");
                 forward.setId(3);
                 int fwdResId = activityRes.getIdentifier("ic_action_next_item", "drawable", cordova.getActivity().getPackageName());
                 Drawable fwdIcon = activityRes.getDrawable(fwdResId);
@@ -585,13 +604,14 @@ public class InAppBrowser extends CordovaPlugin {
                         return false;
                     }
                 });
-
+				
                 // Close/Done button
                 Button close = new Button(cordova.getActivity());
                 RelativeLayout.LayoutParams closeLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-                closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				closeLayoutParams.addRule(RelativeLayout.ALIGN_LEFT);
+				
                 close.setLayoutParams(closeLayoutParams);
-                forward.setContentDescription("Close Button");
+                close.setContentDescription("Close");
                 close.setId(5);
                 int closeResId = activityRes.getIdentifier("ic_action_remove", "drawable", cordova.getActivity().getPackageName());
                 Drawable closeIcon = activityRes.getDrawable(closeResId);
@@ -608,6 +628,35 @@ public class InAppBrowser extends CordovaPlugin {
                         closeDialog();
                     }
                 });
+				
+				
+                // custom button
+				int customBtnSize = toolbar.getLayoutParams().height; //Get height of toolbar to draw a rect. icon
+				
+                Button customBtn = new Button(cordova.getActivity());
+                RelativeLayout.LayoutParams customBtnLayoutParams = new RelativeLayout.LayoutParams(customBtnSize, customBtnSize);
+                customBtnLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                customBtn.setLayoutParams(customBtnLayoutParams);
+                customBtn.setContentDescription("Spot");
+                customBtn.setId(6);
+				
+                Resources customBtnRes = cordova.getActivity().getResources();
+                int customBtnResId = customBtnRes.getIdentifier("ic_action_spot", "drawable", cordova.getActivity().getPackageName());
+                Drawable customBtnIcon = customBtnRes.getDrawable(customBtnResId);
+                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+                {
+                    customBtn.setBackgroundDrawable(customBtnIcon);
+                }
+                else
+                {
+                    customBtn.setBackground(customBtnIcon);
+                }
+                customBtn.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+						customButtonAction();
+                    }
+                });
+				
 
                 // WebView
                 inAppWebView = new WebView(cordova.getActivity());
@@ -638,7 +687,7 @@ public class InAppBrowser extends CordovaPlugin {
                 }
 
                 inAppWebView.loadUrl(url);
-                inAppWebView.setId(6);
+                inAppWebView.setId(7);
                 inAppWebView.getSettings().setLoadWithOverviewMode(true);
                 inAppWebView.getSettings().setUseWideViewPort(true);
                 inAppWebView.requestFocus();
@@ -647,17 +696,21 @@ public class InAppBrowser extends CordovaPlugin {
                 // Add the back and forward buttons to our action button container layout
                 actionButtonContainer.addView(back);
                 actionButtonContainer.addView(forward);
+				
+				actionButtonContainer.addView(customBtn);
+				actionButtonContainer.addView(close);
 
                 // Add the views to our toolbar
                 toolbar.addView(actionButtonContainer);
-                toolbar.addView(edittext);
-                toolbar.addView(close);
-
+                
+				
                 // Don't add the toolbar if its been disabled
                 if (getShowLocationBar()) {
                     // Add our toolbar to our main view/layout
-                    main.addView(toolbar);
-                }
+					toolbar.addView(edittext);
+				}
+
+                main.addView(toolbar);
 
                 // Add our webview to our main view/layout
                 main.addView(inAppWebView);
