@@ -433,6 +433,23 @@ public class InAppBrowser extends CordovaPlugin {
             this.inAppWebView.goForward();
         }
     }
+    
+	private void customButtonAction() {
+	
+		//send event to JS
+        try {
+			String webUrl = this.inAppWebView.getUrl();
+		
+            JSONObject obj = new JSONObject();
+            obj.put("type", "custombutton");
+            obj.put("url", webUrl);
+
+            sendUpdate(obj, true);
+        } catch (JSONException ex) {
+            Log.d(LOG_TAG, "Should never happen");
+        }
+	
+	}
 
     /**
      * Navigate to the new page
@@ -550,7 +567,7 @@ public class InAppBrowser extends CordovaPlugin {
                 // Toolbar layout
                 RelativeLayout toolbar = new RelativeLayout(cordova.getActivity());
                 //Please, no more black!
-                toolbar.setBackgroundColor(android.graphics.Color.LTGRAY);
+                toolbar.setBackgroundColor(android.graphics.Color.WHITE);
                 toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(44)));
                 toolbar.setPadding(this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2));
                 toolbar.setHorizontalGravity(Gravity.LEFT);
@@ -566,7 +583,7 @@ public class InAppBrowser extends CordovaPlugin {
                 // Back button
                 ImageButton back = new ImageButton(cordova.getActivity());
                 RelativeLayout.LayoutParams backLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-                backLayoutParams.addRule(RelativeLayout.ALIGN_LEFT);
+                backLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
                 back.setLayoutParams(backLayoutParams);
                 back.setContentDescription("Back Button");
                 back.setId(Integer.valueOf(2));
@@ -632,7 +649,7 @@ public class InAppBrowser extends CordovaPlugin {
                 // Close/Done button
                 ImageButton close = new ImageButton(cordova.getActivity());
                 RelativeLayout.LayoutParams closeLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-                closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
                 close.setLayoutParams(closeLayoutParams);
                 forward.setContentDescription("Close Button");
                 close.setId(Integer.valueOf(5));
@@ -647,6 +664,27 @@ public class InAppBrowser extends CordovaPlugin {
                 close.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         closeDialog();
+                    }
+                });
+                
+                // custom button
+                ImageButton custom = new ImageButton(cordova.getActivity());
+                RelativeLayout.LayoutParams customLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+                customLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                custom.setLayoutParams(customLayoutParams);
+                forward.setContentDescription("Spot");
+                custom.setId(Integer.valueOf(5));
+                int customResId = activityRes.getIdentifier("ic_action_spot", "drawable", cordova.getActivity().getPackageName());
+                Drawable customIcon = activityRes.getDrawable(customResId);
+                custom.setImageDrawable(customIcon);
+                custom.setBackground(null);
+                custom.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                custom.setPadding(0, this.dpToPixels(0), 0, this.dpToPixels(0));
+                custom.getAdjustViewBounds();
+
+                custom.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        customButtonAction();
                     }
                 });
 
@@ -701,19 +739,18 @@ public class InAppBrowser extends CordovaPlugin {
                 inAppWebView.requestFocusFromTouch();
 
                 // Add the back and forward buttons to our action button container layout
-                actionButtonContainer.addView(back);
-                actionButtonContainer.addView(forward);
+                //actionButtonContainer.addView(back);
+                //actionButtonContainer.addView(forward);
 
                 // Add the views to our toolbar
                 toolbar.addView(actionButtonContainer);
-                toolbar.addView(edittext);
+                //toolbar.addView(edittext);
                 toolbar.addView(close);
+                toolbar.addView(custom);
+                toolbar.addView(back);
+                toolbar.addView(forward);
 
-                // Don't add the toolbar if its been disabled
-                if (getShowLocationBar()) {
-                    // Add our toolbar to our main view/layout
-                    main.addView(toolbar);
-                }
+                main.addView(toolbar);
 
                 // Add our webview to our main view/layout
                 main.addView(inAppWebView);

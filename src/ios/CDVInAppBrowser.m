@@ -529,8 +529,11 @@
     // We create the views in code for primarily for ease of upgrades and not requiring an external .xib to be included
 
     CGRect webViewBounds = self.view.bounds;
-    BOOL toolbarIsAtBottom = ![_browserOptions.toolbarposition isEqualToString:kInAppBrowserToolbarBarPositionTop];
-    webViewBounds.size.height -= _browserOptions.location ? FOOTER_HEIGHT : TOOLBAR_HEIGHT;
+    //BOOL toolbarIsAtBottom = ![_browserOptions.toolbarposition isEqualToString:kInAppBrowserToolbarBarPositionTop];
+    BOOL toolbarIsAtBottom = true;
+    //webViewBounds.size.height -= _browserOptions.location ? FOOTER_HEIGHT : TOOLBAR_HEIGHT;
+    webViewBounds.size.height -= TOOLBAR_HEIGHT;
+    webViewBounds.size.height -= TOOLBAR_HEIGHT;
     self.webView = [[UIWebView alloc] initWithFrame:webViewBounds];
 
     self.webView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
@@ -656,7 +659,7 @@
     
     
     //add toolbar buttons
-    [self.toolbar setItems:@[self.closeButton, flexibleSpaceButton, self.backButton, fixedSpaceButton, self.forwardButton, flexibleSpaceButton, customButton]];
+    [self.toolbar setItems:@[self.closeButton, flexibleSpaceButton, customButton]];
     
     
     
@@ -691,7 +694,51 @@
 
     
     
+    
+    
+    
+    
+    
+    
+    
+    CGRect toolbarFrame2 = CGRectMake(0.0, self.view.bounds.size.height - TOOLBAR_HEIGHT, self.view.bounds.size.width, TOOLBAR_HEIGHT);
+    
+    self.toolbar2 = [[UIToolbar alloc] initWithFrame:toolbarFrame2];
+    self.toolbar2.alpha = 1.000;
+    self.toolbar2.autoresizesSubviews = YES;
+    self.toolbar2.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    self.toolbar2.barStyle = UIBarStyleBlackOpaque;
+    self.toolbar2.clearsContextBeforeDrawing = NO;
+    self.toolbar2.clipsToBounds = NO;
+    self.toolbar2.contentMode = UIViewContentModeScaleToFill;
+    self.toolbar2.hidden = NO;
+    self.toolbar2.multipleTouchEnabled = NO;
+    self.toolbar2.opaque = NO;
+    self.toolbar2.userInteractionEnabled = YES;
+    
+    self.toolbar2.barTintColor = [self getUIColorObjectFromHexString:_browserOptions.backgroundcolor alpha:1];
+    
+    [self.toolbar2 setItems:@[flexibleSpaceButton, self.backButton, fixedSpaceButton, self.forwardButton, flexibleSpaceButton]];
+    
+    //add toolbar bottom border
+    UIView *topView2 = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.5, mainViewSize.width, borderWidth)];
+    topView2.opaque = YES;
+    topView2.backgroundColor = borderColor;
+    topView2.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    [self.toolbar2 addSubview:topView2];
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     [self.view addSubview:self.toolbar];
+    [self.view addSubview:self.toolbar2];
     [self.view addSubview:self.addressLabel];
     [self.view addSubview:self.spinner];
 }

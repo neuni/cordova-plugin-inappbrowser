@@ -1,3 +1,4 @@
+cordova.define("cordova-plugin-inappbrowser.inappbrowser", function(require, exports, module) {
 /*
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -110,3 +111,5 @@
         return iab;
     };
 })();
+
+});
